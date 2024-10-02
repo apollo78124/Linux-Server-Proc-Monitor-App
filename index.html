@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proc Monitor Dashboard</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link href="./style.css" rel="stylesheet" async="">
+</head>
+<body>
+<main>
+    <section class="title">
+    <div class="container">
+        <h1>
+            8005 ASN2 Eunhak Lee System Monitor Dashboard
+        </h1>
+        <p class="clock">Current Time: <span class="time">time loading...</span></p>
+    </div>
+</section>
+    <section class="dashboard-control">
+
+        <div class="container">
+            <div class="tabs">
+                        <button class="tabs" onclick="getByteSentAndReceived(this)">
+1. Byte Sent and Received
+        </button>
+                <button class="tabs">
+2. Active TCP Connections
+        </button>
+                <button class="tabs">
+3. UDP Connections
+        </button>
+                <button class="tabs">
+4. Network Interface Usage
+        </button>
+                                <button class="tabs">
+5. Listening Ports
+        </button>
+            </div>
+        </div>
+    </section>
+
+    <section class="result">
+        <div class="container">
+            <div class="pid-change">
+                <p>PID:</p> <input name="pid" value="1"/>
+            </div>
+            <p class="current-pid">Showing Result for PID: <span>.</span></p>
+            <div class="result-values">
+                <p>Result Loading...</p>
+            </div>
+        </div>
+    </section>
+</main>
+    <script>
+$(document).ready(function() {
+    // Function to send AJAX request
+    function updateTime() {
+        $.ajax({
+            url: '/actions/getTime/',
+            method: 'GET',
+            success: function(data) {
+                $('section.title .clock span').text(data);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                $('section.title .clock span').text('loading time...');
+            }
+        });
+    }
+
+    // Set interval to call the function every 0.5 seconds
+    setInterval(updateTime, 500);
+});
+
+function getByteSentAndReceived(button) {
+    $(button).addClass('selected');
+
+    function updateThis() {
+        var pidd = $('input[name="pid"]')[0].value;
+        $('section.result .container p.current-pid span').text(pidd);
+
+        $.ajax({
+            url: '/actions/task1/',
+            method: 'POST',
+            data: JSON.stringify({ pid: parseInt(pidd) }),
+            success: function(data) {
+                renderResponse(data)
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                $('section.result .container .result-values').text('loading result...');
+            }
+        });
+    }
+
+    setInterval(updateThis, 500);
+}
+
+    function renderResponse(data) {
+        $('.result-values').empty(); // Clear previous response
+
+        if (data.error) {
+            $('.result-values').append(`<p style="color: red;">${data.error}</p>`);
+        } else {
+            const html = Object.keys(data).map(interface => {
+                const { bytes_received, bytes_sent } = data[interface];
+                return `
+                    <div>
+                        <strong>${interface}:</strong>
+                        <p>Bytes Received: ${bytes_received}</p>
+                        <p>Bytes Sent: ${bytes_sent}</p>
+                    </div>
+                `;
+            }).join('');
+            $('.result-values').append(html);
+        }
+    }
+
+    </script>
+</body>
+</html>

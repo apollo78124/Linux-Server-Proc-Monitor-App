@@ -1,0 +1,91 @@
+:root {
+    --Blue: #013a81;
+    --Orange: #f99b1c;
+    --DarkBlue: #002145;
+    --DarkGrey: #393939;
+    --DarkOrange: #d17300;
+    --MediumGrey: #717074;
+    --LightGrey: #e5e5e5;
+    --LightBlue: #336cb3;
+    --LighterGrey: #f0f0f0;
+    --LighterBlue: #eaebf0;
+    --White: #fff;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial';
+    color: var(--DarkBlue);
+}
+
+h1 {
+    font-family: 'Arial';
+}
+
+main {
+    padding-top: 80px;
+}
+
+    section {
+        width: 100%;
+    }
+
+    section .container {
+        width: 100%;
+        max-width: 1024px;
+        margin: 0 auto;
+        padding: 25px 25px;
+        background-color: var(--LighterBlue);
+
+    }
+
+section.dashboard-control .tabs {
+    display: flex;
+    column-gap: 0px;
+}
+
+section.dashboard-control .tabs button {
+    padding: 10px 15px;
+    background-color: var(--LightGrey);
+    border: 2px solid var(--LightGrey);
+    border-bottom: none;
+    background-color:var(--Blue);
+    color: #FFF;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+
+section.dashboard-control .tabs button.selected {
+    background-color: #FFF;
+    color: var(--Blue);
+    border: 2px solid var(--Blue);
+}
+
+
+section.result .container {
+    padding-bottom: 120px;
+    min-height: 80vh
+}
+
+
+section.result .container .pid-change {
+    padding-bottom: 20px;
+    display: flex;
+    column-gap: 20px;
+}
+
+section.result .container .pid-change input {
+    padding: 3px 5px;
+    border: 1px solid #f0f0f0;
+    border-radius: 2px;
+}
+
+section.result .container p.current-pid {
+    padding-bottom: 20px;
+}
+
+
+
