@@ -24,16 +24,16 @@
                         <button class="tabs" onclick="getByteSentAndReceived(this)">
 1. Byte Sent and Received
         </button>
-                <button class="tabs">
+                <button class="tabs" onclick="getActiveTCPConnections(this)">
 2. Active TCP Connections
         </button>
-                <button class="tabs">
+                <button class="tabs" onclick="getActiveUDPConnections(this)">
 3. UDP Connections
         </button>
-                <button class="tabs">
+                <button class="tabs" onclick="getNetworkInterfaceUsage(this)">
 4. Network Interface Usage
         </button>
-                                <button class="tabs">
+                                <button class="tabs" onclick="getListeningPorts(this)">
 5. Listening Ports
         </button>
             </div>
@@ -53,68 +53,201 @@
     </section>
 </main>
     <script>
-$(document).ready(function() {
-    // Function to send AJAX request
-    function updateTime() {
-        $.ajax({
-            url: '/actions/getTime/',
-            method: 'GET',
-            success: function(data) {
-                $('section.title .clock span').text(data);
-            },
-            error: function(xhr, status, error) {
-                console.error('Error:', error);
-                $('section.title .clock span').text('loading time...');
-            }
-        });
-    }
+        var intervalIDCurrent = 0;
+    $(document).ready(function() {
+        startClock();
+    });
 
-    // Set interval to call the function every 0.5 seconds
-    setInterval(updateTime, 500);
-});
-
-function getByteSentAndReceived(button) {
-    $(button).addClass('selected');
-
-    function updateThis() {
-        var pidd = $('input[name="pid"]')[0].value;
-        $('section.result .container p.current-pid span').text(pidd);
-
-        $.ajax({
-            url: '/actions/task1/',
-            method: 'POST',
-            data: JSON.stringify({ pid: parseInt(pidd) }),
-            success: function(data) {
-                renderResponse(data)
-            },
-            error: function(xhr, status, error) {
-                console.error('Error:', error);
-                $('section.result .container .result-values').text('loading result...');
-            }
-        });
-    }
-
-    setInterval(updateThis, 500);
-}
-
-    function renderResponse(data) {
-        $('.result-values').empty(); // Clear previous response
-
-        if (data.error) {
-            $('.result-values').append(`<p style="color: red;">${data.error}</p>`);
-        } else {
-            const html = Object.keys(data).map(interface => {
-                const { bytes_received, bytes_sent } = data[interface];
-                return `
-                    <div>
-                        <strong>${interface}:</strong>
-                        <p>Bytes Received: ${bytes_received}</p>
-                        <p>Bytes Sent: ${bytes_sent}</p>
-                    </div>
-                `;
-            }).join('');
-            $('.result-values').append(html);
+    function startClock() {
+            // Function to send AJAX request
+        function updateTime() {
+            $.ajax({
+                url: '/actions/getTime/',
+                method: 'GET',
+                success: function(data) {
+                    $('section.title .clock span').text(data);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    $('section.title .clock span').text('loading time...');
+                }
+            });
         }
+
+        // Set interval to call the function every 0.5 seconds
+        setInterval(updateTime, 500);
+    }
+
+    /**
+     * 1. Byte Sent and Received
+     * @param button
+     */
+    function getByteSentAndReceived(button) {
+        clearPrevTab();
+        $(button).addClass('selected');
+
+        function updateThis() {
+            var pidd = $('input[name="pid"]')[0].value;
+            $('section.result .container p.current-pid span').text(pidd);
+
+            $.ajax({
+                url: '/actions/task1/',
+                method: 'POST',
+                data: JSON.stringify({ pid: parseInt(pidd) }),
+                success: function(data) {
+                    renderResponse(data)
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    $('section.result .container .result-values').text('loading result...');
+                }
+            });
+        }
+
+            function renderResponse(data) {
+                $('.result-values').empty(); // Clear previous response
+
+                if (data.error) {
+                    $('.result-values').append(`<p style="color: red;">${data.error}</p>`);
+                } else {
+                    const html = Object.keys(data).map(interface => {
+                        const { bytes_received, bytes_sent } = data[interface];
+                        return `
+                            <div>
+                                <strong>${interface}:</strong>
+                                <p>Bytes Received: ${bytes_received}</p>
+                                <p>Bytes Sent: ${bytes_sent}</p>
+                            </div>
+                        `;
+                    }).join('');
+                    $('.result-values').append(html);
+                }
+            }
+
+        intervalIDCurrent = setInterval(updateThis, 500);
+    }
+
+    /**
+     * 2. Active TCP Connections
+     * @param button
+     */
+    function getActiveTCPConnections(button) {
+        clearPrevTab();
+        $(button).addClass('selected');
+
+        function updateThis2() {
+            var pidd = $('input[name="pid"]')[0].value;
+            $('section.result .container p.current-pid span').text(pidd);
+
+            $.ajax({
+                url: '/actions/task2/',
+                method: 'POST',
+                data: JSON.stringify({ pid: parseInt(pidd) }),
+                success: function(data) {
+                    renderResponse(data)
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    $('section.result .container .result-values').text('loading result...');
+                }
+            });
+        }
+
+        intervalIDCurrent = setInterval(updateThis2, 500);
+    }
+
+        /**
+     * 3. Active UDP Connections
+     * @param button
+     */
+    function getActiveUDPConnections(button) {
+        clearPrevTab();
+        $(button).addClass('selected');
+
+        function updateThis3() {
+            var pidd = $('input[name="pid"]')[0].value;
+            $('section.result .container p.current-pid span').text(pidd);
+
+            $.ajax({
+                url: '/actions/task3/',
+                method: 'POST',
+                data: JSON.stringify({ pid: parseInt(pidd) }),
+                success: function(data) {
+                    renderResponse(data)
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    $('section.result .container .result-values').text('loading result...');
+                }
+            });
+        }
+
+        intervalIDCurrent = setInterval(updateThis3, 500);
+    }
+
+            /**
+     * 4. Network Interface Usage
+     * @param button
+     */
+    function getNetworkInterfaceUsage(button) {
+        clearPrevTab();
+        $(button).addClass('selected');
+
+        function updateThis4() {
+            var pidd = $('input[name="pid"]')[0].value;
+            $('section.result .container p.current-pid span').text(pidd);
+
+            $.ajax({
+                url: '/actions/task4/',
+                method: 'POST',
+                data: JSON.stringify({ pid: parseInt(pidd) }),
+                success: function(data) {
+                    renderResponse(data)
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    $('section.result .container .result-values').text('loading result...');
+                }
+            });
+        }
+
+        intervalIDCurrent = setInterval(updateThis4, 500);
+    }
+
+    /**
+     * 5. Listening Ports
+     * @param button
+     */
+    function getListeningPorts(button) {
+        clearPrevTab();
+        $(button).addClass('selected');
+
+        function updateThis5() {
+            var pidd = $('input[name="pid"]')[0].value;
+            $('section.result .container p.current-pid span').text(pidd);
+
+            $.ajax({
+                url: '/actions/task5/',
+                method: 'POST',
+                data: JSON.stringify({ pid: parseInt(pidd) }),
+                success: function(data) {
+                    renderResponse(data)
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    $('section.result .container .result-values').text('loading result...');
+                }
+            });
+        }
+
+        intervalIDCurrent = setInterval(updateThis4, 500);
+    }
+
+
+
+    function clearPrevTab() {
+        $('section.dashboard-control .tabs button').removeClass('selected');
+        clearInterval(intervalIDCurrent);
     }
 
     </script>

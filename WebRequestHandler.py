@@ -8,19 +8,7 @@ from urllib.parse import parse_qsl, urlparse
 
 class WebRequestHandler1(BaseHTTPRequestHandler):
     def do_GET(self):
-
-        if self.path == '/actions/getOpenConnections/':
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            response = {
-                "connections": [
-                    {"ip": "192.168.1.1", "port": 80, "status": "active"},
-                    {"ip": "192.168.1.2", "port": 443, "status": "inactive"}
-                ]
-            }
-            self.wfile.write(json.dumps(response).encode('utf-8'))
-        elif self.path == '/actions/getTime/':
+        if self.path == '/actions/getTime/':
             self.send_response(200)
             self.send_header('Content-type', 'text/plain')
             self.end_headers()
@@ -76,6 +64,41 @@ def get_network_io(pid):
 
     try:
         with open(net_dev_path, 'r') as file:
+            lines = file.readlines()
+
+        # Skip the first two lines (header)
+        data = {}
+        for line in lines[2:]:
+            # Split the line into interface name and stats
+            parts = line.split(':')
+            if len(parts) > 1:
+                interface = parts[0].strip()
+                stats = parts[1].strip().split()
+
+                # Convert bytes sent and received to integers
+                bytes_received = int(stats[0]) if len(stats) > 0 else 0
+                bytes_sent = int(stats[8]) if len(stats) > 8 else 0
+
+                data[interface] = {
+                    "bytes_received": bytes_received,
+                    "bytes_sent": bytes_sent
+                }
+
+        return data
+
+    except Exception as e:
+        print(f"Error reading network stats for PID {pid}: {e}")
+        return None
+
+# 2. Active TCP Connections
+def get_active_tcp_connections(pid):
+    net_tcp_path = f'/proc/{pid}/net/tcp'
+
+    if not os.path.exists(net_tcp_path):
+        return None  # Process does not exist or does not have net/dev info
+
+    try:
+        with open(net_tcp_path, 'r') as file:
             lines = file.readlines()
 
         # Skip the first two lines (header)
