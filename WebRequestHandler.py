@@ -1,10 +1,12 @@
 import json
 import os
 from datetime import datetime
-from functools import cached_property
-from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler
-from urllib.parse import parse_qsl, urlparse
+from BytesCount import get_network_io
+from activetcp import get_active_tcp_connections
+from activeudp import get_active_udp_connections
+from networkinterfaceusage import get_network_interface_usage
+from listeningports import get_listening_ports
 
 class WebRequestHandler1(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -48,79 +50,44 @@ class WebRequestHandler1(BaseHTTPRequestHandler):
                 response = network_io if network_io is not None else {
                     "error": "No data found for the given PID or process does not exist."}
                 self.wfile.write(json.dumps(response).encode('utf-8'))
+            # 2. Active TCP connections
+            elif self.path == '/actions/task2/':
+                tcpcons = get_active_tcp_connections(pid)
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                response = tcpcons if tcpcons is not None else {
+                    "error": "No data found for the given PID or process does not exist."}
+                self.wfile.write(json.dumps(response).encode('utf-8'))
+            # 3. Active UDP connections
+            elif self.path == '/actions/task3/':
+                udpcons = get_active_udp_connections(pid)
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                response = udpcons if udpcons is not None else {
+                    "error": "No data found for the given PID or process does not exist."}
+                self.wfile.write(json.dumps(response).encode('utf-8'))
+            # 4. Network Interface Usage
+            elif self.path == '/actions/task4/':
+                udpcons = get_network_interface_usage(pid)
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                response = udpcons if udpcons is not None else {
+                    "error": "No data found for the given PID or process does not exist."}
+                self.wfile.write(json.dumps(response).encode('utf-8'))
+            # 5. Listening Ports
+            elif self.path == '/actions/task5/':
+                listeningports = get_listening_ports(pid)
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                response = listeningports if listeningports is not None else {
+                    "error": "No data found for the given PID or process does not exist."}
+                self.wfile.write(json.dumps(response).encode('utf-8'))
         except json.JSONDecodeError:
             self.send_response(400)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
             self.wfile.write(json.dumps({"error": "Invalid JSON."}).encode('utf-8'))
-
-
-# 1. Bytes Sent and Received
-def get_network_io(pid):
-    net_dev_path = f'/proc/{pid}/net/dev'
-
-    if not os.path.exists(net_dev_path):
-        return None  # Process does not exist or does not have net/dev info
-
-    try:
-        with open(net_dev_path, 'r') as file:
-            lines = file.readlines()
-
-        # Skip the first two lines (header)
-        data = {}
-        for line in lines[2:]:
-            # Split the line into interface name and stats
-            parts = line.split(':')
-            if len(parts) > 1:
-                interface = parts[0].strip()
-                stats = parts[1].strip().split()
-
-                # Convert bytes sent and received to integers
-                bytes_received = int(stats[0]) if len(stats) > 0 else 0
-                bytes_sent = int(stats[8]) if len(stats) > 8 else 0
-
-                data[interface] = {
-                    "bytes_received": bytes_received,
-                    "bytes_sent": bytes_sent
-                }
-
-        return data
-
-    except Exception as e:
-        print(f"Error reading network stats for PID {pid}: {e}")
-        return None
-
-# 2. Active TCP Connections
-def get_active_tcp_connections(pid):
-    net_tcp_path = f'/proc/{pid}/net/tcp'
-
-    if not os.path.exists(net_tcp_path):
-        return None  # Process does not exist or does not have net/dev info
-
-    try:
-        with open(net_tcp_path, 'r') as file:
-            lines = file.readlines()
-
-        # Skip the first two lines (header)
-        data = {}
-        for line in lines[2:]:
-            # Split the line into interface name and stats
-            parts = line.split(':')
-            if len(parts) > 1:
-                interface = parts[0].strip()
-                stats = parts[1].strip().split()
-
-                # Convert bytes sent and received to integers
-                bytes_received = int(stats[0]) if len(stats) > 0 else 0
-                bytes_sent = int(stats[8]) if len(stats) > 8 else 0
-
-                data[interface] = {
-                    "bytes_received": bytes_received,
-                    "bytes_sent": bytes_sent
-                }
-
-        return data
-
-    except Exception as e:
-        print(f"Error reading network stats for PID {pid}: {e}")
-        return None

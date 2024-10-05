@@ -144,7 +144,7 @@
                 method: 'POST',
                 data: JSON.stringify({ pid: parseInt(pidd) }),
                 success: function(data) {
-                    renderResponse(data)
+                    renderResponseSimple(data);
                 },
                 error: function(xhr, status, error) {
                     console.error('Error:', error);
@@ -152,6 +152,8 @@
                 }
             });
         }
+
+
 
         intervalIDCurrent = setInterval(updateThis2, 500);
     }
@@ -173,7 +175,7 @@
                 method: 'POST',
                 data: JSON.stringify({ pid: parseInt(pidd) }),
                 success: function(data) {
-                    renderResponse(data)
+                    renderResponseSimple(data)
                 },
                 error: function(xhr, status, error) {
                     console.error('Error:', error);
@@ -202,7 +204,7 @@
                 method: 'POST',
                 data: JSON.stringify({ pid: parseInt(pidd) }),
                 success: function(data) {
-                    renderResponse(data)
+                    renderResponseSimple2(data)
                 },
                 error: function(xhr, status, error) {
                     console.error('Error:', error);
@@ -231,7 +233,7 @@
                 method: 'POST',
                 data: JSON.stringify({ pid: parseInt(pidd) }),
                 success: function(data) {
-                    renderResponse(data)
+                    renderResponseSimple(data)
                 },
                 error: function(xhr, status, error) {
                     console.error('Error:', error);
@@ -240,9 +242,16 @@
             });
         }
 
-        intervalIDCurrent = setInterval(updateThis4, 500);
+        intervalIDCurrent = setInterval(updateThis5, 500);
     }
 
+    function renderResponseSimple(data) {
+        $('section.result .container .result-values').text(JSON.stringify(data));
+    }
+
+    function renderResponseSimple2(data) {
+        $('section.result .container .result-values').html((JSON.stringify(data)).replaceAll(',', '<br />'));
+    }
 
 
     function clearPrevTab() {
